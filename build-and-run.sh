@@ -1,0 +1,1 @@
+mvn clean install && java -jar ./target/vertx-learning-1.0-SNAPSHOT.jar
