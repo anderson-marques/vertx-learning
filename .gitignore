@@ -1,0 +1,7 @@
+.settings
+.vertx
+bin
+target
+.project
+.classpath
+.vscode/
