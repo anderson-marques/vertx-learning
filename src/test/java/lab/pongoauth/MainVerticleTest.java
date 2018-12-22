@@ -11,14 +11,19 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 @RunWith(VertxUnitRunner.class)
-public class PingVerticleTest {
+public class MainVerticleTest {
 
+    
     private Vertx vertx;
+    private static final int TESTING_PORT = 7070;
 
     @Before
     public void setUp(TestContext context) {
         vertx = Vertx.vertx();
-        vertx.deployVerticle(PingVerticle.class.getName(), context.asyncAssertSuccess());
+        vertx.deployVerticle(
+            new MainVerticle().setPort(TESTING_PORT), 
+            context.asyncAssertSuccess()
+        );
     }
 
     @After
@@ -30,7 +35,7 @@ public class PingVerticleTest {
     public void testMyApplication(TestContext context) {
         final Async async = context.async();
 
-        vertx.createHttpClient().getNow(8000, "localhost", "/", response -> {
+        vertx.createHttpClient().getNow(TESTING_PORT, "localhost", "/", response -> {
             response.handler(body -> {
                 context.assertTrue(body.toString().contains("pong"));
                 async.complete();
