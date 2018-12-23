@@ -34,8 +34,9 @@ public class Message {
    * 
    * @param text the text to set
    */
-  public void setText(String text) {
+  public Message setText(String text) {
     this.text = text;
+    return this;
   }
 
   @Override

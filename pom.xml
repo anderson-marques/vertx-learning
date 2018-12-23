@@ -18,10 +18,16 @@
   </properties>
 
   <dependencies>
-    <!--Vertx provided dependencies-->
+    <!--Vertx Core-->
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
+    <!--Vertx Web s-->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web</artifactId>
       <version>${vertx.version}</version>
     </dependency>
     <!-- Vertx MongoDB client -->

@@ -1,21 +1,27 @@
 package lab.pongoauth;
 
-import static lab.pongoauth.boundary.config.EnvironmentValues.WEBAPP_PORT;
+
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
+import io.vertx.ext.web.Router;
 import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQOptions;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import lab.pongoauth.boundary.api.MessagesResource;
 import lab.pongoauth.boundary.config.EnvironmentValues;
 import lab.pongoauth.boundary.config.RabbitMqConfig;
+import lab.pongoauth.boundary.config.WebApplication;
+import lab.pongoauth.boundary.repository.MessageRepository;
+import lab.pongoauth.boundary.repository.MongoMessageRepository;
+import lab.pongoauth.control.SaveMessageService;
+import lab.pongoauth.control.SaveMessageServiceV1;
 
 public class MainVerticle extends AbstractVerticle {
 
@@ -56,27 +62,19 @@ public class MainVerticle extends AbstractVerticle {
       final RabbitMQClient rabbitClient
   ) {
     Future<Void> future = Future.future();
-    LOGGER.info("Initializing Web Application...");
-    HttpServer server = vertx.createHttpServer();
 
-    server.requestHandler(request -> {
-      // This handler gets called for each request that arrives on the server
-      HttpServerResponse response = request.response();
-      response.putHeader("content-type", "text/plain");
-      // Write to the response and end it
-      response.end("pong");
-    });
+    MessageRepository messageRepository = new MongoMessageRepository(mongoClient);
+	  SaveMessageService saveMessageService = new SaveMessageServiceV1(messageRepository);
+    MessagesResource messagesController = new MessagesResource(saveMessageService);
 
-    Integer port = this.environmentValues.getIntValue(WEBAPP_PORT);
-
-    server.listen(port, result -> {
+    WebApplication webApplication = new WebApplication(vertx, messagesController, this.environmentValues);
+    webApplication.start(result -> {
       if (result.succeeded()) {
         future.complete();
       } else {
         future.fail(result.cause());
       }
     });
-
     return future;
   }
 
