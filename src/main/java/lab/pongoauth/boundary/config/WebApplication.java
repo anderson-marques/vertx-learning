@@ -11,29 +11,31 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import lab.pongoauth.boundary.api.MessageResource;
 import lab.pongoauth.boundary.api.MessagesResource;
 import lab.pongoauth.boundary.repository.DuplicateMessageException;
-
-import static lab.pongoauth.boundary.config.EnvironmentValues.WEBAPP_PORT;
 
 public class WebApplication {
 
   private static final String TAG = WebApplication.class.getName();
   private static final Logger LOGGER = Logger.getLogger(TAG);
+
   private static final String MESSAGES_PATH = "/messages";
+  private static final String MESSAGE_PATH = "/messages/:id";
 
   private final HttpServer server;
   private final Router router;
-  private final EnvironmentValues environmentValues;
+  private final int port;
 
   public WebApplication(Vertx vertx, 
-                        MessagesResource messagesResource, 
-                        EnvironmentValues environmentValues) {
+                        MessagesResource messagesResource,
+                        MessageResource messageResource,
+                        int port) {
     LOGGER.info("Initializing Web Application...");
 
     this.server = vertx.createHttpServer();
     this.router = Router.router(vertx);
-    this.environmentValues = environmentValues;
+    this.port = port;
 
     Handler<RoutingContext> defaultFailureHandler = failureRoutingContext -> {
       HttpServerResponse response = failureRoutingContext.response();
@@ -57,7 +59,13 @@ public class WebApplication {
       .handler(messagesResource.createMessageHandler())
       .failureHandler(defaultFailureHandler);
 
-    router.get(MESSAGES_PATH).handler(messagesResource.listMessageHandler());
+    router.get(MESSAGES_PATH)
+      .handler(messagesResource.listMessageHandler())
+      .failureHandler(defaultFailureHandler);
+
+    router.get(MESSAGE_PATH)
+      .handler(messageResource.findMessageHandler())
+      .failureHandler(defaultFailureHandler);
 
     // Pong resource
     router.get("/ping").handler(res -> {
@@ -68,11 +76,9 @@ public class WebApplication {
   }
 
   public void start(Handler<AsyncResult<Void>> resultHandler) {
-    server.requestHandler(router);
+    this.server.requestHandler(this.router);
 
-    Integer port = this.environmentValues.getIntValue(WEBAPP_PORT);
-
-    this.server.listen(port, result -> {
+    this.server.listen(this.port, result -> {
       if (result.succeeded()) {
         resultHandler.handle(Future.succeededFuture());
       } else {

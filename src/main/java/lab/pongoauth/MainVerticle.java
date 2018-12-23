@@ -1,6 +1,7 @@
 package lab.pongoauth;
 
 import static lab.pongoauth.boundary.config.EnvironmentValues.MONGO_DB_NAME;
+import static lab.pongoauth.boundary.config.EnvironmentValues.WEBAPP_PORT;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -12,12 +13,15 @@ import io.vertx.rabbitmq.RabbitMQOptions;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import lab.pongoauth.boundary.api.MessageResource;
 import lab.pongoauth.boundary.api.MessagesResource;
 import lab.pongoauth.boundary.config.EnvironmentValues;
 import lab.pongoauth.boundary.config.RabbitMqConfig;
 import lab.pongoauth.boundary.config.WebApplication;
 import lab.pongoauth.boundary.repository.MessageRepository;
 import lab.pongoauth.boundary.repository.MongoMessageRepository;
+import lab.pongoauth.control.FindMessageService;
+import lab.pongoauth.control.FindMessageServiceV1;
 import lab.pongoauth.control.ListMessagesService;
 import lab.pongoauth.control.ListMessagesServiceV1;
 import lab.pongoauth.control.SaveMessageService;
@@ -67,9 +71,12 @@ public class MainVerticle extends AbstractVerticle {
     MessageRepository messageRepository = new MongoMessageRepository(mongoClient);
     SaveMessageService saveMessageService = new SaveMessageServiceV1(messageRepository);
     ListMessagesService listMessagesService = new ListMessagesServiceV1(messageRepository);
-    MessagesResource messagesController = new MessagesResource(saveMessageService, listMessagesService);
+    FindMessageService findMessageService = new FindMessageServiceV1(messageRepository);
+    MessagesResource messagesResource = new MessagesResource(saveMessageService, listMessagesService);
+    MessageResource messageResource = new MessageResource(findMessageService);
+    Integer port = this.environmentValues.getIntValue(WEBAPP_PORT);
 
-    new WebApplication(vertx, messagesController, this.environmentValues).start(result -> {
+    new WebApplication(vertx, messagesResource, messageResource, port).start(result -> {
       if (result.succeeded()) {
         future.complete();
       } else {

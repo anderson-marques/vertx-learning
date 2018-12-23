@@ -69,6 +69,10 @@ public class Message implements Serializable {
     return jsonObject;
   }
 
+  public String toJsonString() {
+    return this.toJson().toString();
+  }
+
   @Override
   public boolean equals(final Object other) {
     if (this == other) {
