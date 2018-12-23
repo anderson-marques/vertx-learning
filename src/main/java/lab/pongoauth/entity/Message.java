@@ -15,7 +15,8 @@ public class Message implements Serializable {
   public static Message createFromJsonString(String messageJson) {
     try {
       JsonObject jsonObject = new JsonObject(messageJson);
-      return new Message(null).setText(jsonObject.getString("text"));
+      return new Message(jsonObject.getString("id"))
+                .setText(jsonObject.getString("text"));
     } catch (Exception e) {
       throw new IllegalArgumentException();
     }

@@ -8,10 +8,12 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import lab.pongoauth.boundary.api.MessagesResource;
+import lab.pongoauth.boundary.repository.DuplicateMessageException;
 
 import static lab.pongoauth.boundary.config.EnvironmentValues.WEBAPP_PORT;
 
@@ -34,22 +36,23 @@ public class WebApplication {
     this.router = Router.router(vertx);
     this.environmentValues = environmentValues;
 
-    Handler<RoutingContext> defaultFailureHandler = routingContext -> {
-      if (routingContext.failure() instanceof IllegalArgumentException) {
-        routingContext.response().setStatusCode(400);
-        routingContext.response().end();
+    Handler<RoutingContext> defaultFailureHandler = failureRoutingContext -> {
+      HttpServerResponse response = failureRoutingContext.response();
+      Throwable cause = failureRoutingContext.failure();
+
+      if (cause instanceof IllegalArgumentException) {
+        response.setStatusCode(400).end();
+      } else if (cause instanceof DuplicateMessageException) {
+        response.setStatusCode(409).end();
+      } else {
+        response.setStatusCode(500).end();
       }
     };
 
-    ;
     router.route()
       .handler(BodyHandler.create())
       .consumes("application/json")
       .produces("application/json");
-
-    router.exceptionHandler(throwable -> {
-      LOGGER.log(Level.WARNING, "Fail to execute the service", throwable);
-    });
 
     router.post(MESSAGES_PATH)
       .handler(messagesResource.createMessageHandler())
