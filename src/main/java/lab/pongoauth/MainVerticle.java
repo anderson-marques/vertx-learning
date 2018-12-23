@@ -12,9 +12,18 @@ import io.vertx.rabbitmq.RabbitMQOptions;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import lab.pongoauth.config.EnvironmentValues;
+import lab.pongoauth.config.RabbitMqConfig;
+
 public class MainVerticle extends AbstractVerticle {
 
   private int port = 8080;
+
+  private final EnvironmentValues environmentValues;
+
+  public MainVerticle(final EnvironmentValues environmentValues) {
+    this.environmentValues = environmentValues;
+  }
 
   public MainVerticle setPort(int port) {
     this.port = port;
@@ -47,7 +56,10 @@ public class MainVerticle extends AbstractVerticle {
     return future;
   }
 
-  private Future<Void> startWebApplication(final MongoClient mongoClient, final RabbitMQClient rabbitMQClient) {
+  private Future<Void> startWebApplication(
+      final MongoClient mongoClient, 
+      final RabbitMQClient rabbitClient
+  ) {
     Future<Void> future = Future.future();
     LOGGER.info("Initializing Web Application...");
     HttpServer server = vertx.createHttpServer();
@@ -75,11 +87,10 @@ public class MainVerticle extends AbstractVerticle {
     Future<RabbitMQClient> future = Future.future();
     LOGGER.info("Initializing RabbitMQ...");
     try {
-      RabbitMQOptions config = new RabbitMQOptions();
-      config.setUri("amqp://guest:guest@localhost:5672");
-      RabbitMQClient rabbitMQClient = RabbitMQClient.create(vertx, config);
+      RabbitMQOptions options = new RabbitMqConfig(this.environmentValues).getOptions();
+      RabbitMQClient client = RabbitMQClient.create(vertx, options);
       LOGGER.info("RabbitMQ started");
-      future.complete(rabbitMQClient);
+      future.complete(client);
     } catch (Throwable e) {
       LOGGER.info("RabbitMQ failed to start");
       future.fail(e);

@@ -1,6 +1,7 @@
 package lab.pongoauth;
 
 import io.vertx.core.Vertx;
+import lab.pongoauth.config.EnvironmentValues;
 
 public class Main {
 
@@ -14,7 +15,11 @@ public class Main {
   public void start() {
     // Create the Verticle
     Vertx vertx = Vertx.vertx();
-    MainVerticle mainVerticle = new MainVerticle();
+
+    // Obtaing the EnvironmentValues 
+    EnvironmentValues environmentValues = new EnvironmentValues();
+
+    MainVerticle mainVerticle = new MainVerticle(environmentValues);
     // Deploy PingService
     vertx.deployVerticle(mainVerticle);
   }

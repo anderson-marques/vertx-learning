@@ -51,7 +51,12 @@ app_1   | INFO: MainVerticle started
 
 Environment variables required by the application:
 
-- `WEB_API_PORT` - Web Application Port. Default: `8080`
+- `APP_TESTING_PORT` - Web Application Port used in tests. Default: `7070`.
+- `WEB_API_PORT` - Web Application Port. Default: `8080`.
+- `RABBITMQ_USER` - RabbitMQ username. Default: `guest`.
+- `RABBITMQ_PASSWORD` - RabbitMQ username. Default: `guest`.
+- `RABBITMQ_HOST` - RabbitMQ hostname. Default: `localhost`.
+- `RABBITMQ_PORT` - RabbitMQ port. Default: `5672`.
 
 ## Troubleshooting
 
@@ -65,12 +70,6 @@ $ hostname
 MacBook-Pro-de-Anderson.local
 
 $ vim /etc/hosts
-##
-# Host Database
-#
-# localhost is used to configure the loopback interface
-# when the system is booting.  Do not change this entry.
-##
 127.0.0.1       localhost
 255.255.255.255 broadcasthost
 ::1             localhost
