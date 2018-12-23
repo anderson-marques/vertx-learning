@@ -6,6 +6,8 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
+import io.vertx.rabbitmq.RabbitMQClient;
+import io.vertx.rabbitmq.RabbitMQOptions;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,9 +25,10 @@ public class MainVerticle extends AbstractVerticle {
 
   @Override
   public void start(Future<Void> startFuture) throws Exception {
-    Future<Void> initializationSteps = startMongo().compose(mongoClient -> 
-        startWebApplication(mongoClient)
-    );
+    Future<Void> initializationSteps = startMessageBroker()
+        .compose(rabbitMQClient -> 
+          startMongo().compose(mongoClient -> 
+            startWebApplication(mongoClient, rabbitMQClient)));
     initializationSteps.setHandler(startFuture);
   }
 
@@ -44,7 +47,7 @@ public class MainVerticle extends AbstractVerticle {
     return future;
   }
 
-  private Future<Void> startWebApplication(final MongoClient mongoClient) {
+  private Future<Void> startWebApplication(final MongoClient mongoClient, final RabbitMQClient rabbitMQClient) {
     Future<Void> future = Future.future();
     LOGGER.info("Initializing Web Application...");
     HttpServer server = vertx.createHttpServer();
@@ -65,6 +68,23 @@ public class MainVerticle extends AbstractVerticle {
       }
     });
 
+    return future;
+  }
+
+  private Future<RabbitMQClient> startMessageBroker() {
+    Future<RabbitMQClient> future = Future.future();
+    LOGGER.info("Initializing RabbitMQ...");
+    try {
+      RabbitMQOptions config = new RabbitMQOptions();
+      config.setUri("amqp://guest:guest@localhost:5672");
+      RabbitMQClient rabbitMQClient = RabbitMQClient.create(vertx, config);
+      LOGGER.info("RabbitMQ started");
+      future.complete(rabbitMQClient);
+    } catch (Throwable e) {
+      LOGGER.info("RabbitMQ failed to start");
+      future.fail(e);
+    }
+    
     return future;
   }
 }

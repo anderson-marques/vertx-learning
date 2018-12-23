@@ -4,6 +4,10 @@ services:
     image: mongo:4.1.6
     ports:
       - "27017:27017"
+  rabbitmq:
+    image: rabbitmq:3.7.8
+    ports:
+      - "5672:5672"
   test:
     build:
       context: ./
