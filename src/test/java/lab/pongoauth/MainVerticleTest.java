@@ -5,7 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientResponse;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -32,14 +34,17 @@ public class MainVerticleTest {
     }
 
     @Test
+    @SuppressWarnings( "deprecation" )
     public void testMyApplication(TestContext context) {
         final Async async = context.async();
 
-        vertx.createHttpClient().getNow(TESTING_PORT, "localhost", "/", response -> {
+        Handler<HttpClientResponse> responseHandler = response -> {
             response.handler(body -> {
                 context.assertTrue(body.toString().contains("pong"));
                 async.complete();
             });
-        });
+        };
+        
+        vertx.createHttpClient().getNow(TESTING_PORT, "localhost", "/", responseHandler);
     }
 }

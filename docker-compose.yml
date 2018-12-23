@@ -1,5 +1,9 @@
 version: '3'
 services:
+  mongodb:
+    image: mongo:4.1.6
+    ports:
+      - "27017:27017"
   test:
     build:
       context: ./

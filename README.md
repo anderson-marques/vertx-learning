@@ -46,3 +46,35 @@ app_1   | Dec 22, 2018 10:17:33 PM lab.pongoauth.MainVerticle
 app_1   | INFO: MainVerticle started
 
 ```
+
+## Environment Variables
+
+Environment variables required by the application:
+
+- `WEB_API_PORT` - Web Application Port. Default: `8080`
+
+## Troubleshooting
+
+### Macbook Pro Users
+
+If you use a mackbook Pro. The DSN resolution for localhost can present some delay. To fix this problem check your hostname and include localhost resolution
+in the `/etc/hosts` file:
+
+```bash
+$ hostname
+MacBook-Pro-de-Anderson.local
+
+$ vim /etc/hosts
+##
+# Host Database
+#
+# localhost is used to configure the loopback interface
+# when the system is booting.  Do not change this entry.
+##
+127.0.0.1       localhost
+255.255.255.255 broadcasthost
+::1             localhost
+## Include this lines
+127.0.0.1   MacBook-Pro-de-Anderson.local
+::1         MacBook-Pro-de-Anderson.local
+```
