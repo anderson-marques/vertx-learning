@@ -2,20 +2,32 @@ package lab.pongoauth.boundary.api;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
-import lab.pongoauth.control.FindMessageService;
+import lab.pongoauth.control.FindMessageFunction;
+import lab.pongoauth.control.UpdateMessageFunction;
 import lab.pongoauth.entity.Message;
 
 public class MessageResource {
 
-  private FindMessageService findMessageService;
+  private final FindMessageFunction findMessageService;
+  private final UpdateMessageFunction updateMessageService;
 
-  public MessageResource(FindMessageService findMessageService) {
+  public MessageResource(FindMessageFunction findMessageService, UpdateMessageFunction updateMessageService) {
     this.findMessageService = findMessageService;
+    this.updateMessageService = updateMessageService;
   }
 
   public Handler<RoutingContext> updateMessageHandler() {
     return routingContext -> {
-      routingContext.response().end("message updated");
+      Message message = Message.createFromJson(routingContext.getBodyAsJson());
+      updateMessageService.update(message, res -> {
+        if (res.succeeded()){
+          routingContext.response()
+            .putHeader("Content-type", "application/json")
+            .end(message.toJsonString());
+        } else {
+          routingContext.fail(res.cause());
+        }
+      });
     };
   }
 

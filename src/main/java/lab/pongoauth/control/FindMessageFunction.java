@@ -4,8 +4,9 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import lab.pongoauth.entity.Message;
 
-public interface FindMessageService {
+@FunctionalInterface
+public interface FindMessageFunction {
 
   public void findMessageById(String id, Handler<AsyncResult<Message>> asyncResultHandler);
-  
+
 }

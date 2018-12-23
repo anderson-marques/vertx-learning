@@ -67,6 +67,10 @@ public class WebApplication {
       .handler(messageResource.findMessageHandler())
       .failureHandler(defaultFailureHandler);
 
+    router.put(MESSAGE_PATH)
+      .handler(messageResource.updateMessageHandler())
+      .failureHandler(defaultFailureHandler);
+
     // Pong resource
     router.get("/ping").handler(res -> {
       res.response().end("pong");

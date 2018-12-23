@@ -8,11 +8,11 @@ import io.vertx.core.Handler;
 import lab.pongoauth.boundary.repository.MessageRepository;
 import lab.pongoauth.entity.Message;
 
-public class ListMessagesServiceV1 implements ListMessagesService {
+public class ListMessagesFunctionV1 implements ListMessagesFunction {
 
   private MessageRepository repository;
 
-  public ListMessagesServiceV1(MessageRepository repository) {
+  public ListMessagesFunctionV1(MessageRepository repository) {
     this.repository = repository;
   }
 

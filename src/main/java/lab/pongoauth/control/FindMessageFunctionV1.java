@@ -6,11 +6,11 @@ import io.vertx.core.Handler;
 import lab.pongoauth.boundary.repository.MessageRepository;
 import lab.pongoauth.entity.Message;
 
-public class FindMessageServiceV1 implements FindMessageService {
+public class FindMessageFunctionV1 implements FindMessageFunction {
 
   private MessageRepository messageRepository;
 
-  public FindMessageServiceV1(MessageRepository messageRepository) {
+  public FindMessageFunctionV1(MessageRepository messageRepository) {
     this.messageRepository = messageRepository;
   }
 

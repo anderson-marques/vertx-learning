@@ -25,13 +25,10 @@ public class MongoMessageRepository implements MessageRepository {
 
   @Override
   public void save(final Message message, final Handler<AsyncResult<Message>> asyncResultHandler) {
-
-    JsonObject document = new JsonObject();
-    document.put("text", message.getText());
+    JsonObject document = message.toJson();
 
     if (message.getId() != null) {
       document.put("_id", message.getId());
-      document.put("id", message.getId());
     }
 
     mongoClient.insert(MESSAGES_COLLECTION, document, res -> {
@@ -75,6 +72,20 @@ public class MongoMessageRepository implements MessageRepository {
     mongoClient.findOne(MESSAGES_COLLECTION, query, null, res -> {
       if (res.succeeded()) {
         asyncResultHandler.handle(Future.succeededFuture(Message.createFromJson(res.result())));
+      } else {
+        asyncResultHandler.handle(Future.failedFuture(res.cause()));
+      }
+    });
+  }
+
+  @Override
+  public void update(Message message, Handler<AsyncResult<Boolean>> asyncResultHandler) {
+    JsonObject document = message.toJson();
+    document.put("_id", message.getId());
+
+    mongoClient.save(MESSAGES_COLLECTION, document, res -> {
+      if (res.succeeded()) {
+        asyncResultHandler.handle(Future.succeededFuture(true));
       } else {
         asyncResultHandler.handle(Future.failedFuture(res.cause()));
       }

@@ -4,16 +4,16 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.EncodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.RoutingContext;
-import lab.pongoauth.control.ListMessagesService;
-import lab.pongoauth.control.SaveMessageService;
+import lab.pongoauth.control.ListMessagesFunction;
+import lab.pongoauth.control.SaveMessageFunction;
 import lab.pongoauth.entity.Message;
 
 public class MessagesResource {
 
-  private final SaveMessageService saveMessageService;
-  private final ListMessagesService listMessagesService;
+  private final SaveMessageFunction saveMessageService;
+  private final ListMessagesFunction listMessagesService;
 
-  public MessagesResource(final SaveMessageService saveMessageService, final ListMessagesService listMessagesService){
+  public MessagesResource(final SaveMessageFunction saveMessageService, final ListMessagesFunction listMessagesService){
     this.saveMessageService = saveMessageService;
     this.listMessagesService = listMessagesService;
   }

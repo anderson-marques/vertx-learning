@@ -6,11 +6,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import lab.pongoauth.entity.Message;
 
-/**
- * SaveMessageService.
- */
-public interface SaveMessageService {
-
+@FunctionalInterface
+public interface SaveMessageFunction {
   public void saveMessage(final Message message, Handler<AsyncResult<Message>> resultHandler);
-  public void listMessages(Handler<AsyncResult<List<Message>>> resultHandler);
 }

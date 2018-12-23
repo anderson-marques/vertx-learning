@@ -20,12 +20,14 @@ import lab.pongoauth.boundary.config.RabbitMqConfig;
 import lab.pongoauth.boundary.config.WebApplication;
 import lab.pongoauth.boundary.repository.MessageRepository;
 import lab.pongoauth.boundary.repository.MongoMessageRepository;
-import lab.pongoauth.control.FindMessageService;
-import lab.pongoauth.control.FindMessageServiceV1;
-import lab.pongoauth.control.ListMessagesService;
-import lab.pongoauth.control.ListMessagesServiceV1;
-import lab.pongoauth.control.SaveMessageService;
-import lab.pongoauth.control.SaveMessageServiceV1;
+import lab.pongoauth.control.FindMessageFunction;
+import lab.pongoauth.control.FindMessageFunctionV1;
+import lab.pongoauth.control.ListMessagesFunction;
+import lab.pongoauth.control.ListMessagesFunctionV1;
+import lab.pongoauth.control.SaveMessageFunction;
+import lab.pongoauth.control.SaveMessageFunctionV1;
+import lab.pongoauth.control.UpdateMessageFunction;
+import lab.pongoauth.control.UpdateMessageFunctionV1;
 
 public class MainVerticle extends AbstractVerticle {
 
@@ -69,11 +71,14 @@ public class MainVerticle extends AbstractVerticle {
     Future<Void> future = Future.future();
 
     MessageRepository messageRepository = new MongoMessageRepository(mongoClient);
-    SaveMessageService saveMessageService = new SaveMessageServiceV1(messageRepository);
-    ListMessagesService listMessagesService = new ListMessagesServiceV1(messageRepository);
-    FindMessageService findMessageService = new FindMessageServiceV1(messageRepository);
+    
+    SaveMessageFunction saveMessageService = new SaveMessageFunctionV1(messageRepository);
+    ListMessagesFunction listMessagesService = new ListMessagesFunctionV1(messageRepository);
+    FindMessageFunction findMessageService = new FindMessageFunctionV1(messageRepository);
     MessagesResource messagesResource = new MessagesResource(saveMessageService, listMessagesService);
-    MessageResource messageResource = new MessageResource(findMessageService);
+    UpdateMessageFunction updateMessageService = new UpdateMessageFunctionV1(messageRepository);
+    MessageResource messageResource = new MessageResource(findMessageService, updateMessageService);
+
     Integer port = this.environmentValues.getIntValue(WEBAPP_PORT);
 
     new WebApplication(vertx, messagesResource, messageResource, port).start(result -> {

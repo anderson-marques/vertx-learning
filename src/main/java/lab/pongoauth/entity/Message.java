@@ -64,8 +64,12 @@ public class Message implements Serializable {
 
   public JsonObject toJson() {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.put("id", this.id);
-    jsonObject.put("text", this.text);
+    if (this.id != null) {
+      jsonObject.put("id", this.id);
+    }
+    if (this.text != null) {
+      jsonObject.put("text", this.text);
+    }
     return jsonObject;
   }
 
