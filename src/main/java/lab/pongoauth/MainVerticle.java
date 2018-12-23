@@ -1,16 +1,14 @@
 package lab.pongoauth;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MainVerticle extends AbstractVerticle {
 
@@ -25,7 +23,9 @@ public class MainVerticle extends AbstractVerticle {
 
   @Override
   public void start(Future<Void> startFuture) throws Exception {
-    Future<Void> initializationSteps = startMongo().compose(mongoClient -> startWebApplication(mongoClient));
+    Future<Void> initializationSteps = startMongo().compose(mongoClient -> 
+        startWebApplication(mongoClient)
+    );
     initializationSteps.setHandler(startFuture);
   }
 
