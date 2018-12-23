@@ -1,6 +1,7 @@
 package lab.pongoauth.boundary.api;
 
 import io.vertx.core.Handler;
+import io.vertx.core.json.EncodeException;
 import io.vertx.ext.web.RoutingContext;
 import lab.pongoauth.control.SaveMessageService;
 import lab.pongoauth.entity.Message;
@@ -15,9 +16,21 @@ public class MessagesResource {
 
   public Handler<RoutingContext> createMessageHandler() {
     return routingContext -> {
-	    this.saveMessageService.saveMessage(new Message(null).setText("some message"), res -> {
-        routingContext.response().end("message saved");
-      });
+      try {
+        final String stringBody = routingContext.getBodyAsString();
+        final Message newMessage = Message.createFromJsonString(stringBody);
+
+        this.saveMessageService.saveMessage(newMessage, res -> {
+          if (res.succeeded()){
+            routingContext.response().setStatusCode(201);
+            routingContext.response().end(res.result().toJson().toString());
+          } else {
+            routingContext.fail(res.cause());
+          }
+        });
+      } catch (IllegalArgumentException | EncodeException e) {
+        routingContext.fail(e);
+      }
     };
   }
 

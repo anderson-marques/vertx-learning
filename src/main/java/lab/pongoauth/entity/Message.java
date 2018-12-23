@@ -1,11 +1,25 @@
 package lab.pongoauth.entity;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Message {
+import io.vertx.core.json.JsonObject;
+
+public class Message implements Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   private final String id;
   private String text = "";
+
+  public static Message createFromJsonString(String messageJson) {
+    try {
+      JsonObject jsonObject = new JsonObject(messageJson);
+      return new Message(null).setText(jsonObject.getString("text"));
+    } catch (Exception e) {
+      throw new IllegalArgumentException();
+    }
+  }
 
   public Message(final String id) {
     this.id = id;
@@ -37,6 +51,13 @@ public class Message {
   public Message setText(String text) {
     this.text = text;
     return this;
+  }
+
+  public JsonObject toJson() {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("id", this.id);
+    jsonObject.put("text", this.text);
+    return jsonObject;
   }
 
   @Override

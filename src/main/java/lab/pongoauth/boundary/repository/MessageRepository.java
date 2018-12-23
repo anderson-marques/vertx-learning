@@ -6,5 +6,5 @@ import lab.pongoauth.entity.Message;
 
 public interface MessageRepository {
 
-  public void save(final Message message, Handler<AsyncResult<String>> asyncResultHandler);
+  public void save(final Message message, Handler<AsyncResult<Message>> asyncResultHandler);
 }

@@ -23,7 +23,7 @@ public class MongoMessageRepository implements MessageRepository {
   }
 
   @Override
-  public void save(final Message message, final Handler<AsyncResult<String>> asyncResultHandler) {
+  public void save(final Message message, final Handler<AsyncResult<Message>> asyncResultHandler) {
 
     JsonObject document = new JsonObject();
     if (message.getId() != null) {
@@ -34,8 +34,8 @@ public class MongoMessageRepository implements MessageRepository {
     mongoClient.save("messages", document, res -> {
       if (res.succeeded()) {
         String id = res.result();
-        LOGGER.info("Saved message with id " + id);
-        asyncResultHandler.handle(Future.succeededFuture(id));
+        Message messageSaved = new Message(id).setText(message.getText());
+        asyncResultHandler.handle(Future.succeededFuture(messageSaved));
       } else {
         LOGGER.log(Level.WARNING, "Failed to save message: " + document, res.cause());
         asyncResultHandler.handle(Future.failedFuture(res.cause()));
