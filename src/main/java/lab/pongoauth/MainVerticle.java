@@ -1,5 +1,7 @@
 package lab.pongoauth;
 
+import static lab.pongoauth.boundary.config.EnvironmentValues.WEBAPP_PORT;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServer;
@@ -12,22 +14,15 @@ import io.vertx.rabbitmq.RabbitMQOptions;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import lab.pongoauth.config.EnvironmentValues;
-import lab.pongoauth.config.RabbitMqConfig;
+import lab.pongoauth.boundary.config.EnvironmentValues;
+import lab.pongoauth.boundary.config.RabbitMqConfig;
 
 public class MainVerticle extends AbstractVerticle {
-
-  private int port = 8080;
 
   private final EnvironmentValues environmentValues;
 
   public MainVerticle(final EnvironmentValues environmentValues) {
     this.environmentValues = environmentValues;
-  }
-
-  public MainVerticle setPort(int port) {
-    this.port = port;
-    return this;
   }
 
   private static final Logger LOGGER = Logger.getLogger(MainVerticle.class.getName());
@@ -71,6 +66,8 @@ public class MainVerticle extends AbstractVerticle {
       // Write to the response and end it
       response.end("pong");
     });
+
+    Integer port = this.environmentValues.getIntValue(WEBAPP_PORT);
 
     server.listen(port, result -> {
       if (result.succeeded()) {

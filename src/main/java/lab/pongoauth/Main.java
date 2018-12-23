@@ -1,7 +1,7 @@
 package lab.pongoauth;
 
 import io.vertx.core.Vertx;
-import lab.pongoauth.config.EnvironmentValues;
+import lab.pongoauth.boundary.config.EnvironmentValues;
 
 public class Main {
 

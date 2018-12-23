@@ -1,4 +1,4 @@
-package lab.pongoauth.domain;
+package lab.pongoauth.entity;
 
 import java.util.Objects;
 

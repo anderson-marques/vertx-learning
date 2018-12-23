@@ -1,9 +1,9 @@
-package lab.pongoauth.config;
+package lab.pongoauth.boundary.config;
 
-import static lab.pongoauth.config.EnvironmentValues.RABBITMQ_HOST;
-import static lab.pongoauth.config.EnvironmentValues.RABBITMQ_PASSWORD;
-import static lab.pongoauth.config.EnvironmentValues.RABBITMQ_PORT;
-import static lab.pongoauth.config.EnvironmentValues.RABBITMQ_USER;
+import static lab.pongoauth.boundary.config.EnvironmentValues.RABBITMQ_HOST;
+import static lab.pongoauth.boundary.config.EnvironmentValues.RABBITMQ_PASSWORD;
+import static lab.pongoauth.boundary.config.EnvironmentValues.RABBITMQ_PORT;
+import static lab.pongoauth.boundary.config.EnvironmentValues.RABBITMQ_USER;
 
 import io.vertx.rabbitmq.RabbitMQOptions;
 

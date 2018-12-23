@@ -1,7 +1,5 @@
 package lab.pongoauth;
 
-import static lab.pongoauth.config.EnvironmentValues.APP_TESTING_PORT;
-
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientResponse;
@@ -9,22 +7,35 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
-import lab.pongoauth.config.EnvironmentValues;
+import lab.pongoauth.boundary.config.EnvironmentValues;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 @RunWith(VertxUnitRunner.class)
 public class MainVerticleTest {
 
   private Vertx vertx;
 
+  /**
+   * Prepares the tests setting up a test application.
+   * 
+   * @param context - TextContext
+   */
   @Before
   public void setUp(TestContext context) {
     vertx = Vertx.vertx();
-    vertx.deployVerticle(new MainVerticle(new EnvironmentValues()), context.asyncAssertSuccess());
+
+    EnvironmentValues env = new EnvironmentValues();
+
+    EnvironmentValues envSpied = Mockito.spy(env);
+
+    Mockito.when(envSpied.getIntValue("WEBAPP_PORT")).thenReturn(7070);
+
+    vertx.deployVerticle(new MainVerticle(envSpied), context.asyncAssertSuccess());
   }
 
   @After
@@ -44,8 +55,6 @@ public class MainVerticleTest {
       });
     };
 
-    Integer testingPort = new EnvironmentValues().getIntValue(APP_TESTING_PORT);
-
-    vertx.createHttpClient().getNow(testingPort, "localhost", "/", responseHandler);
+    vertx.createHttpClient().getNow(7070, "localhost", "/", responseHandler);
   }
 }
