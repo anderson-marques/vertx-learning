@@ -2,16 +2,20 @@ package lab.pongoauth.boundary.api;
 
 import io.vertx.core.Handler;
 import io.vertx.core.json.EncodeException;
+import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.RoutingContext;
+import lab.pongoauth.control.ListMessagesService;
 import lab.pongoauth.control.SaveMessageService;
 import lab.pongoauth.entity.Message;
 
 public class MessagesResource {
 
   private final SaveMessageService saveMessageService;
+  private final ListMessagesService listMessagesService;
 
-  public MessagesResource(final SaveMessageService saveMessageService){
+  public MessagesResource(final SaveMessageService saveMessageService, final ListMessagesService listMessagesService){
     this.saveMessageService = saveMessageService;
+    this.listMessagesService = listMessagesService;
   }
 
   public Handler<RoutingContext> createMessageHandler() {
@@ -36,7 +40,20 @@ public class MessagesResource {
 
   public Handler<RoutingContext> listMessageHandler() {
     return routingContext -> {
-      routingContext.response().end("listing messages...");
+      try {
+        this.listMessagesService.listMessages(listResult -> {
+          if(listResult.succeeded()){
+            routingContext
+              .response()
+              .putHeader("Content-Type", "application/json")
+              .end(new JsonArray(listResult.result()).toString());
+          } else {
+            routingContext.fail(listResult.cause());
+          }
+        });
+      } catch (Exception e) {
+        routingContext.fail(e);
+      }
     };
   }
 

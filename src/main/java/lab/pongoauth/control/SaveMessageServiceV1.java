@@ -1,7 +1,6 @@
 package lab.pongoauth.control;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -13,9 +12,6 @@ import lab.pongoauth.entity.Message;
  * SaveMessageService.
  */
 public class SaveMessageServiceV1 implements SaveMessageService {
-
-  private static final String TAG = SaveMessageService.class.getName();
-  private static final Logger LOGGER = Logger.getLogger(TAG);
 
   private final MessageRepository messageRepository;
 

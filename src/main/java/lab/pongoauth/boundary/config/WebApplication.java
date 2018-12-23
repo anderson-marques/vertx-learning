@@ -1,6 +1,5 @@
 package lab.pongoauth.boundary.config;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import io.vertx.core.AsyncResult;

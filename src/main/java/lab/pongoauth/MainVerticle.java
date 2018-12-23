@@ -18,6 +18,8 @@ import lab.pongoauth.boundary.config.RabbitMqConfig;
 import lab.pongoauth.boundary.config.WebApplication;
 import lab.pongoauth.boundary.repository.MessageRepository;
 import lab.pongoauth.boundary.repository.MongoMessageRepository;
+import lab.pongoauth.control.ListMessagesService;
+import lab.pongoauth.control.ListMessagesServiceV1;
 import lab.pongoauth.control.SaveMessageService;
 import lab.pongoauth.control.SaveMessageServiceV1;
 
@@ -63,11 +65,11 @@ public class MainVerticle extends AbstractVerticle {
     Future<Void> future = Future.future();
 
     MessageRepository messageRepository = new MongoMessageRepository(mongoClient);
-	  SaveMessageService saveMessageService = new SaveMessageServiceV1(messageRepository);
-    MessagesResource messagesController = new MessagesResource(saveMessageService);
+    SaveMessageService saveMessageService = new SaveMessageServiceV1(messageRepository);
+    ListMessagesService listMessagesService = new ListMessagesServiceV1(messageRepository);
+    MessagesResource messagesController = new MessagesResource(saveMessageService, listMessagesService);
 
-    WebApplication webApplication = new WebApplication(vertx, messagesController, this.environmentValues);
-    webApplication.start(result -> {
+    new WebApplication(vertx, messagesController, this.environmentValues).start(result -> {
       if (result.succeeded()) {
         future.complete();
       } else {
