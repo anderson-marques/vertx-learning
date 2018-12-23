@@ -1,13 +1,11 @@
 package lab.pongoauth;
 
-
+import static lab.pongoauth.boundary.config.EnvironmentValues.MONGO_DB_NAME;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
-import io.vertx.ext.web.Router;
 import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQOptions;
 
@@ -46,14 +44,15 @@ public class MainVerticle extends AbstractVerticle {
     Future<MongoClient> future = Future.future();
     LOGGER.info("Initializing MongoDB...");
     try {
-      MongoClient mongoClient = MongoClient.createNonShared(vertx, new JsonObject());
+      JsonObject mongoConfig = new JsonObject();
+      mongoConfig.put(MONGO_DB_NAME, this.environmentValues.getStringValue(MONGO_DB_NAME));
+      MongoClient mongoClient = MongoClient.createNonShared(vertx, mongoConfig);
       LOGGER.info("MongoClient initialized");
       future.complete(mongoClient);
     } catch (Throwable t) {
       LOGGER.log(Level.SEVERE, "Failed to create MongoClient", t);
       future.fail(t);
     }
-
     return future;
   }
 

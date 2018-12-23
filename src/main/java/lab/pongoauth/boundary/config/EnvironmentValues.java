@@ -8,16 +8,22 @@ public class EnvironmentValues {
   private Map<String, String> values = new HashMap<String, String>();
 
   public static final String WEBAPP_PORT = "WEBAPP_PORT";
+  
   public static final String RABBITMQ_USER = "RABBITMQ_USER";
   public static final String RABBITMQ_PASSWORD = "RABBITMQ_PASSWORD";
   public static final String RABBITMQ_HOST = "RABBITMQ_HOST";
   public static final String RABBITMQ_PORT = "RABBITMQ_PORT";
+
+  public static final String MONGO_DB_NAME = "MONGO_DB_NAME";
 
   private static final String DEFAULT_WEBAPP_PORT = "8080";
   private static final String DEFAULT_RABBITMQ_USER = "guest";
   private static final String DEFAULT_RABBITMQ_PASSWORD = "guest";
   private static final String DEFAULT_RABBITMQ_HOST = "localhost";
   private static final String DEFAULT_RABBITMQ_PORT = "5672";
+
+  private static final String DEFAULT_MONGO_DB_NAME = "messages_db";
+
 
   /**
    * Creates a new EnvironmentValues object pre-setted with default values.
@@ -33,6 +39,8 @@ public class EnvironmentValues {
         ? DEFAULT_RABBITMQ_PORT : System.getenv(RABBITMQ_PORT));
     values.put(WEBAPP_PORT, System.getenv(WEBAPP_PORT) == null 
         ? DEFAULT_WEBAPP_PORT : System.getenv(WEBAPP_PORT));
+    values.put(MONGO_DB_NAME, System.getenv(MONGO_DB_NAME) == null 
+        ? DEFAULT_MONGO_DB_NAME : System.getenv(MONGO_DB_NAME));
   }
 
   /**

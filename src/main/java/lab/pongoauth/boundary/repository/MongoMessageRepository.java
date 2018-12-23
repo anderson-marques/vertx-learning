@@ -1,6 +1,8 @@
 package lab.pongoauth.boundary.repository;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 
@@ -21,9 +23,7 @@ public class MongoMessageRepository implements MessageRepository {
   }
 
   @Override
-  public Future<String> save(final Message message) {
-    Future<String> future = Future.future();
-    future.complete("some-id");
+  public void save(final Message message, final Handler<AsyncResult<String>> asyncResultHandler) {
 
     JsonObject document = new JsonObject();
     if (message.getId() != null) {
@@ -35,12 +35,12 @@ public class MongoMessageRepository implements MessageRepository {
       if (res.succeeded()) {
         String id = res.result();
         LOGGER.info("Saved message with id " + id);
+        asyncResultHandler.handle(Future.succeededFuture(id));
       } else {
         LOGGER.log(Level.WARNING, "Failed to save message: " + document, res.cause());
+        asyncResultHandler.handle(Future.failedFuture(res.cause()));
       }
     });
-
-    return future;
   }
 
 }

@@ -1,9 +1,10 @@
 package lab.pongoauth.boundary.repository;
 
-import io.vertx.core.Future;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import lab.pongoauth.entity.Message;
 
 public interface MessageRepository {
 
-  public Future<String> save(final Message message);
+  public void save(final Message message, Handler<AsyncResult<String>> asyncResultHandler);
 }

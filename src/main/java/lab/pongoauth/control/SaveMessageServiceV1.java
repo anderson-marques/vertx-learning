@@ -26,7 +26,15 @@ public class SaveMessageServiceV1 implements SaveMessageService {
   @Override
   public void saveMessage(final Message message, Handler<AsyncResult<Message>> resultHandler) {
     LOGGER.info("Saving message: " + message);
-    resultHandler.handle(Future.succeededFuture(message));
+    this.messageRepository.save(message, saveResult -> {
+      if (saveResult.succeeded()){
+        LOGGER.info(TAG + "#saved the message: " + message);
+        resultHandler.handle(Future.succeededFuture(message));
+      } else {
+        resultHandler.handle(Future.failedFuture(saveResult.cause()));
+      }
+    });
+    
   }
 
   @Override

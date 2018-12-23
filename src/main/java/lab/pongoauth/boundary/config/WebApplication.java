@@ -22,15 +22,15 @@ public class WebApplication {
   private final Router router;
   private final EnvironmentValues environmentValues;
 
-  public WebApplication(Vertx vertx, MessagesResource messagesController, EnvironmentValues environmentValues){
+  public WebApplication(Vertx vertx, MessagesResource messagesResource, EnvironmentValues environmentValues){
     LOGGER.info("Initializing Web Application...");
 
     this.server = vertx.createHttpServer();
     this.router = Router.router(vertx);
     this.environmentValues = environmentValues;
 
-    router.post(MESSAGES_PATH).handler(messagesController.createMessageHandler());
-    router.get(MESSAGES_PATH).handler(messagesController.listMessageHandler());
+    router.post(MESSAGES_PATH).handler(messagesResource.createMessageHandler());
+    router.get(MESSAGES_PATH).handler(messagesResource.listMessageHandler());
 
     router.get("/").handler( res -> {
       res.response().end("pong");

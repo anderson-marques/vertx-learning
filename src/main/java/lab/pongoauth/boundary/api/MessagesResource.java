@@ -15,7 +15,7 @@ public class MessagesResource {
 
   public Handler<RoutingContext> createMessageHandler() {
     return routingContext -> {
-	    this.saveMessageService.saveMessage(new Message("new-id").setText("some message"), res -> {
+	    this.saveMessageService.saveMessage(new Message(null).setText("some message"), res -> {
         routingContext.response().end("message saved");
       });
     };

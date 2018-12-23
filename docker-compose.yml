@@ -1,9 +1,11 @@
 version: '3'
 services:
   mongodb:
-    image: mongo:4.1.6
+    image: mongo:3.1
     ports:
       - "27017:27017"
+    volumes:
+      - ./data/db:/data/db
   rabbitmq:
     image: rabbitmq:3.7.8
     ports:
@@ -17,3 +19,6 @@ services:
     build: .
     ports:
       - "8080:8080"
+    depends_on:
+      - mongodb
+      - rabbitmq
