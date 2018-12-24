@@ -18,6 +18,8 @@ public class EnvironmentValues {
 
   public static final String ADMIN_PASSWORD = "ADMIN_PASSWORD";
 
+  public static final String ACCESS_TOKEN_SECRET = "ACCESS_TOKEN_SECRET";
+
   private static final String DEFAULT_WEBAPP_PORT = "8080";
   private static final String DEFAULT_RABBITMQ_USER = "guest";
   private static final String DEFAULT_RABBITMQ_PASSWORD = "guest";
@@ -28,6 +30,8 @@ public class EnvironmentValues {
 
   private static final String DEFAULT_ADMIN_PASSWORD = "admin";
 
+  private static final String DEFAULT_ACCESS_TOKEN_SECRET = 
+    "access-token-secret-access-token-secret-access-token-secret-access-token-secret-access-token-secret";
 
   /**
    * Creates a new EnvironmentValues object pre-setted with default values.
@@ -47,6 +51,8 @@ public class EnvironmentValues {
         ? DEFAULT_MONGO_DB_NAME : System.getenv(MONGO_DB_NAME));
     values.put(ADMIN_PASSWORD, System.getenv(ADMIN_PASSWORD) == null 
         ? DEFAULT_ADMIN_PASSWORD : System.getenv(ADMIN_PASSWORD));
+    values.put(ACCESS_TOKEN_SECRET, System.getenv(ACCESS_TOKEN_SECRET) == null 
+        ? DEFAULT_ACCESS_TOKEN_SECRET : System.getenv(ACCESS_TOKEN_SECRET));
   }
 
   /**

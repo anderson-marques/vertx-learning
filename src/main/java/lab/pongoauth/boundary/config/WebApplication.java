@@ -11,6 +11,7 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import lab.pongoauth.boundary.api.AuthenticationResource;
 import lab.pongoauth.boundary.api.MessageResource;
 import lab.pongoauth.boundary.api.MessagesResource;
 import lab.pongoauth.boundary.repository.DocumentConflictException;
@@ -31,6 +32,7 @@ public class WebApplication {
   public WebApplication(Vertx vertx, 
                         MessagesResource messagesResource,
                         MessageResource messageResource,
+                        AuthenticationResource authenticationResource,
                         int port) {
     LOGGER.info("Initializing Web Application...");
 
@@ -57,6 +59,11 @@ public class WebApplication {
       .handler(BodyHandler.create())
       .consumes("application/json")
       .produces("application/json");
+
+    router.post("/login")
+      .consumes("x-www-form-urlencoded")
+      .handler(authenticationResource.authenticateUser())
+      .failureHandler(defaultFailureHandler);
 
     router.post(MESSAGES_PATH)
       .handler(messagesResource.createMessageHandler())

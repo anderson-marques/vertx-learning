@@ -57,7 +57,10 @@ Environment variables required by the application:
 - `RABBITMQ_PASSWORD` - RabbitMQ username. Default: `guest`.
 - `RABBITMQ_HOST` - RabbitMQ hostname. Default: `localhost`.
 - `RABBITMQ_PORT` - RabbitMQ port. Default: `5672`.
-- `ADMIN_PASSWORD` - Admin privileged user's password. Default: `admin`
+- `ADMIN_PASSWORD` - Admin privileged user's password. Default: `admin`.
+- `ACCESS_TOKEN_SECRET` - Passphrase used as symetric key to issue JWT signed access tokens. Default: `access-token-secret`.
+
+The you can set the 
 
 ## Troubleshooting
 
