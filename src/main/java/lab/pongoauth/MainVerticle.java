@@ -18,6 +18,7 @@ import lab.pongoauth.boundary.api.MessagesResource;
 import lab.pongoauth.boundary.config.EnvironmentValues;
 import lab.pongoauth.boundary.config.RabbitMqConfig;
 import lab.pongoauth.boundary.config.WebApplication;
+import lab.pongoauth.boundary.events.EventsGateway;
 import lab.pongoauth.boundary.repository.MessageRepository;
 import lab.pongoauth.boundary.repository.MongoMessageRepository;
 import lab.pongoauth.control.DeleteMessageFunction;
@@ -44,9 +45,9 @@ public class MainVerticle extends AbstractVerticle {
   @Override
   public void start(Future<Void> startFuture) throws Exception {
     Future<Void> initializationSteps = startMessageBroker()
-        .compose(rabbitMQClient -> 
+        .compose(domainEventsGateway -> 
           startMongo().compose(mongoClient -> 
-            startWebApplication(mongoClient, rabbitMQClient)));
+            startWebApplication(mongoClient, domainEventsGateway)));
     initializationSteps.setHandler(startFuture);
   }
 
@@ -68,7 +69,7 @@ public class MainVerticle extends AbstractVerticle {
 
   private Future<Void> startWebApplication(
       final MongoClient mongoClient, 
-      final RabbitMQClient rabbitClient
+      final EventsGateway domainEventsGateway
   ) {
     Future<Void> future = Future.future();
 
@@ -95,14 +96,15 @@ public class MainVerticle extends AbstractVerticle {
     return future;
   }
 
-  private Future<RabbitMQClient> startMessageBroker() {
-    Future<RabbitMQClient> future = Future.future();
+  private Future<EventsGateway> startMessageBroker() {
+    Future<EventsGateway> future = Future.future();
     LOGGER.info("Initializing RabbitMQ...");
     try {
       RabbitMQOptions options = new RabbitMqConfig(this.environmentValues).getOptions();
       RabbitMQClient client = RabbitMQClient.create(vertx, options);
-      LOGGER.info("RabbitMQ started");
-      future.complete(client);
+      EventsGateway domainEventsGateway = new EventsGateway(client);
+      domainEventsGateway.start();
+      future.complete(domainEventsGateway);
     } catch (Throwable e) {
       LOGGER.info("RabbitMQ failed to start");
       future.fail(e);
