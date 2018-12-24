@@ -69,7 +69,7 @@ public class MainVerticle extends AbstractVerticle {
 
   private Future<Void> startWebApplication(
       final MongoClient mongoClient, 
-      final EventsGateway domainEventsGateway
+      final EventsGateway eventsGateway
   ) {
     Future<Void> future = Future.future();
 
@@ -81,8 +81,8 @@ public class MainVerticle extends AbstractVerticle {
     UpdateMessageFunction updateMessageFunction = new UpdateMessageFunctionV1(messageRepository);
     DeleteMessageFunction deleteMessageFunction = new DeleteMessageFunctionV1(messageRepository);
     
-    MessagesResource messagesResource = new MessagesResource(saveMessageFunction, listMessagesFunction);
-    MessageResource messageResource = new MessageResource(findMessageFunction, updateMessageFunction, deleteMessageFunction);
+    MessagesResource messagesResource = new MessagesResource(eventsGateway, saveMessageFunction, listMessagesFunction);
+    MessageResource messageResource = new MessageResource(eventsGateway, findMessageFunction, updateMessageFunction, deleteMessageFunction);
 
     Integer port = this.environmentValues.getIntValue(WEBAPP_PORT);
 

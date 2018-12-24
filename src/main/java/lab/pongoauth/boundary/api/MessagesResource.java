@@ -4,6 +4,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.EncodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.RoutingContext;
+import lab.pongoauth.boundary.events.EventsGateway;
 import lab.pongoauth.control.ListMessagesFunction;
 import lab.pongoauth.control.SaveMessageFunction;
 import lab.pongoauth.entity.Message;
@@ -12,8 +13,13 @@ public class MessagesResource {
 
   private final SaveMessageFunction saveMessageService;
   private final ListMessagesFunction listMessagesService;
+  private final EventsGateway eventsGateway;
 
-  public MessagesResource(final SaveMessageFunction saveMessageService, final ListMessagesFunction listMessagesService){
+  public MessagesResource(
+      final EventsGateway eventsGateway, 
+      final SaveMessageFunction saveMessageService, 
+      final ListMessagesFunction listMessagesService) {
+    this.eventsGateway = eventsGateway;
     this.saveMessageService = saveMessageService;
     this.listMessagesService = listMessagesService;
   }
@@ -26,6 +32,7 @@ public class MessagesResource {
 
         this.saveMessageService.saveMessage(newMessage, res -> {
           if (res.succeeded()){
+            eventsGateway.publishEvent("domain", "message_saved", res.result().toJsonString());
             routingContext.response().setStatusCode(201);
             routingContext.response().end(res.result().toJson().toString());
           } else {
