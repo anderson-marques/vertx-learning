@@ -13,7 +13,8 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import lab.pongoauth.boundary.api.MessageResource;
 import lab.pongoauth.boundary.api.MessagesResource;
-import lab.pongoauth.boundary.repository.DuplicateMessageException;
+import lab.pongoauth.boundary.repository.DocumentConflictException;
+import lab.pongoauth.boundary.repository.DocumentNotFoundException;
 
 public class WebApplication {
 
@@ -43,8 +44,10 @@ public class WebApplication {
 
       if (cause instanceof IllegalArgumentException) {
         response.setStatusCode(400).end();
-      } else if (cause instanceof DuplicateMessageException) {
+      } else if (cause instanceof DocumentConflictException) {
         response.setStatusCode(409).end();
+      } else if (cause instanceof DocumentNotFoundException) {
+        response.setStatusCode(404).end();
       } else {
         response.setStatusCode(500).end();
       }
@@ -69,6 +72,10 @@ public class WebApplication {
 
     router.put(MESSAGE_PATH)
       .handler(messageResource.updateMessageHandler())
+      .failureHandler(defaultFailureHandler);
+
+    router.delete(MESSAGE_PATH)
+      .handler(messageResource.deleteMessageHandler())
       .failureHandler(defaultFailureHandler);
 
     // Pong resource

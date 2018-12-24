@@ -40,7 +40,7 @@ public class MongoMessageRepository implements MessageRepository {
         asyncResultHandler.handle(Future.succeededFuture(Message.createFromJson(document)));
       } else {
         if (res.cause() instanceof MongoWriteException && res.cause().getMessage().contains("E11000 duplicate key error collection")){
-          DuplicateMessageException exception = new DuplicateMessageException("Already exists a message with the provided id.",res.cause());
+          DocumentConflictException exception = new DocumentConflictException("Already exists a message with the provided id.",res.cause());
           asyncResultHandler.handle(Future.failedFuture(exception));
         } else {
           asyncResultHandler.handle(Future.failedFuture(res.cause()));
@@ -71,7 +71,12 @@ public class MongoMessageRepository implements MessageRepository {
     query.put("_id", id);
     mongoClient.findOne(MESSAGES_COLLECTION, query, null, res -> {
       if (res.succeeded()) {
-        asyncResultHandler.handle(Future.succeededFuture(Message.createFromJson(res.result())));
+        if (res.result() == null) {
+          DocumentNotFoundException cause = new DocumentNotFoundException("message");
+          asyncResultHandler.handle(Future.failedFuture(cause));
+        } else {
+          asyncResultHandler.handle(Future.succeededFuture(Message.createFromJson(res.result())));
+        }
       } else {
         asyncResultHandler.handle(Future.failedFuture(res.cause()));
       }
@@ -84,6 +89,19 @@ public class MongoMessageRepository implements MessageRepository {
     document.put("_id", message.getId());
 
     mongoClient.save(MESSAGES_COLLECTION, document, res -> {
+      if (res.succeeded()) {
+        asyncResultHandler.handle(Future.succeededFuture(true));
+      } else {
+        asyncResultHandler.handle(Future.failedFuture(res.cause()));
+      }
+    });
+  }
+
+  @Override
+  public void delete(String id, Handler<AsyncResult<Boolean>> asyncResultHandler) {
+    JsonObject query = new JsonObject();
+    query.put("_id", id);
+    mongoClient.removeDocument(MESSAGES_COLLECTION, query, res -> {
       if (res.succeeded()) {
         asyncResultHandler.handle(Future.succeededFuture(true));
       } else {

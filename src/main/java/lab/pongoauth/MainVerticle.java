@@ -20,6 +20,8 @@ import lab.pongoauth.boundary.config.RabbitMqConfig;
 import lab.pongoauth.boundary.config.WebApplication;
 import lab.pongoauth.boundary.repository.MessageRepository;
 import lab.pongoauth.boundary.repository.MongoMessageRepository;
+import lab.pongoauth.control.DeleteMessageFunction;
+import lab.pongoauth.control.DeleteMessageFunctionV1;
 import lab.pongoauth.control.FindMessageFunction;
 import lab.pongoauth.control.FindMessageFunctionV1;
 import lab.pongoauth.control.ListMessagesFunction;
@@ -72,12 +74,14 @@ public class MainVerticle extends AbstractVerticle {
 
     MessageRepository messageRepository = new MongoMessageRepository(mongoClient);
     
-    SaveMessageFunction saveMessageService = new SaveMessageFunctionV1(messageRepository);
-    ListMessagesFunction listMessagesService = new ListMessagesFunctionV1(messageRepository);
-    FindMessageFunction findMessageService = new FindMessageFunctionV1(messageRepository);
-    MessagesResource messagesResource = new MessagesResource(saveMessageService, listMessagesService);
-    UpdateMessageFunction updateMessageService = new UpdateMessageFunctionV1(messageRepository);
-    MessageResource messageResource = new MessageResource(findMessageService, updateMessageService);
+    SaveMessageFunction saveMessageFunction = new SaveMessageFunctionV1(messageRepository);
+    ListMessagesFunction listMessagesFunction = new ListMessagesFunctionV1(messageRepository);
+    FindMessageFunction findMessageFunction = new FindMessageFunctionV1(messageRepository);
+    UpdateMessageFunction updateMessageFunction = new UpdateMessageFunctionV1(messageRepository);
+    DeleteMessageFunction deleteMessageFunction = new DeleteMessageFunctionV1(messageRepository);
+    
+    MessagesResource messagesResource = new MessagesResource(saveMessageFunction, listMessagesFunction);
+    MessageResource messageResource = new MessageResource(findMessageFunction, updateMessageFunction, deleteMessageFunction);
 
     Integer port = this.environmentValues.getIntValue(WEBAPP_PORT);
 
