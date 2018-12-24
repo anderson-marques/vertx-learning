@@ -57,6 +57,7 @@ Environment variables required by the application:
 - `RABBITMQ_PASSWORD` - RabbitMQ username. Default: `guest`.
 - `RABBITMQ_HOST` - RabbitMQ hostname. Default: `localhost`.
 - `RABBITMQ_PORT` - RabbitMQ port. Default: `5672`.
+- `ADMIN_PASSWORD` - Admin privileged user's password. Default: `admin`
 
 ## Troubleshooting
 

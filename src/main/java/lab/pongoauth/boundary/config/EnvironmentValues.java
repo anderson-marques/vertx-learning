@@ -16,6 +16,8 @@ public class EnvironmentValues {
 
   public static final String MONGO_DB_NAME = "MONGO_DB_NAME";
 
+  public static final String ADMIN_PASSWORD = "ADMIN_PASSWORD";
+
   private static final String DEFAULT_WEBAPP_PORT = "8080";
   private static final String DEFAULT_RABBITMQ_USER = "guest";
   private static final String DEFAULT_RABBITMQ_PASSWORD = "guest";
@@ -23,6 +25,8 @@ public class EnvironmentValues {
   private static final String DEFAULT_RABBITMQ_PORT = "5672";
 
   private static final String DEFAULT_MONGO_DB_NAME = "messages_db";
+
+  private static final String DEFAULT_ADMIN_PASSWORD = "admin";
 
 
   /**
@@ -41,6 +45,8 @@ public class EnvironmentValues {
         ? DEFAULT_WEBAPP_PORT : System.getenv(WEBAPP_PORT));
     values.put(MONGO_DB_NAME, System.getenv(MONGO_DB_NAME) == null 
         ? DEFAULT_MONGO_DB_NAME : System.getenv(MONGO_DB_NAME));
+    values.put(ADMIN_PASSWORD, System.getenv(ADMIN_PASSWORD) == null 
+        ? DEFAULT_ADMIN_PASSWORD : System.getenv(ADMIN_PASSWORD));
   }
 
   /**

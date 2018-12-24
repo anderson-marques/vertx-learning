@@ -36,6 +36,12 @@
       <artifactId>vertx-mongo-client</artifactId>
       <version>${vertx.version}</version>
     </dependency>
+    <!-- Vertx MongoDB authentication -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-auth-mongo</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
     <!-- Vertx RabbitMQ -->
     <dependency>
       <groupId>io.vertx</groupId>
