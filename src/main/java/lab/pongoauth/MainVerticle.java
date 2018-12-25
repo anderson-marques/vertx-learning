@@ -3,13 +3,12 @@ package lab.pongoauth;
 import static lab.pongoauth.boundary.config.EnvironmentValues.ADMIN_PASSWORD;
 import static lab.pongoauth.boundary.config.EnvironmentValues.MONGO_DB_NAME;
 import static lab.pongoauth.boundary.config.EnvironmentValues.WEBAPP_PORT;
-import static lab.pongoauth.boundary.config.EnvironmentValues.ACCESS_TOKEN_SECRET;
+import static lab.pongoauth.boundary.config.EnvironmentValues.JWT_TOKEN_SECRET;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.mongo.HashAlgorithm;
@@ -20,21 +19,20 @@ import io.vertx.rabbitmq.RabbitMQOptions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import lab.pongoauth.boundary.api.AuthenticationResource;
 import lab.pongoauth.boundary.api.MessageResource;
 import lab.pongoauth.boundary.api.MessagesResource;
+import lab.pongoauth.boundary.api.TokenResource;
+import lab.pongoauth.boundary.config.DefaultFailureHandler;
 import lab.pongoauth.boundary.config.EnvironmentValues;
+import lab.pongoauth.boundary.config.FailureHandler;
 import lab.pongoauth.boundary.config.RabbitMqConfig;
 import lab.pongoauth.boundary.config.WebApplication;
 import lab.pongoauth.boundary.events.EventsGateway;
 import lab.pongoauth.boundary.repository.MessageRepository;
 import lab.pongoauth.boundary.repository.MongoMessageRepository;
-import lab.pongoauth.control.AuthenticationFunction;
-import lab.pongoauth.control.AuthenticationFunctionV1;
 import lab.pongoauth.control.DeleteMessageFunction;
 import lab.pongoauth.control.DeleteMessageFunctionV1;
 import lab.pongoauth.control.FindMessageFunction;
@@ -45,6 +43,12 @@ import lab.pongoauth.control.SaveMessageFunction;
 import lab.pongoauth.control.SaveMessageFunctionV1;
 import lab.pongoauth.control.UpdateMessageFunction;
 import lab.pongoauth.control.UpdateMessageFunctionV1;
+import lab.pongoauth.security.Authenticator;
+import lab.pongoauth.security.Authorizer;
+import lab.pongoauth.security.JwtAuthorizer;
+import lab.pongoauth.security.JwtTokenGenerator;
+import lab.pongoauth.security.SecurityTokenGenerator;
+import lab.pongoauth.security.UserCredentialsAuthenticator;
 
 public class MainVerticle extends AbstractVerticle {
 
@@ -134,21 +138,26 @@ public class MainVerticle extends AbstractVerticle {
     UpdateMessageFunction updateMessageFunction = new UpdateMessageFunctionV1(messageRepository);
     DeleteMessageFunction deleteMessageFunction = new DeleteMessageFunctionV1(messageRepository);
 
-    JWTAuth jwtProvider = JWTAuth.create(vertx, new JWTAuthOptions()
+    JWTAuth jwtAuth = JWTAuth.create(vertx, new JWTAuthOptions()
       .addPubSecKey(new PubSecKeyOptions()
         .setAlgorithm("HS256")
-        .setPublicKey(this.environmentValues.getStringValue(ACCESS_TOKEN_SECRET))
+        .setPublicKey(this.environmentValues.getStringValue(JWT_TOKEN_SECRET))
         .setSymmetric(true)));
-
-    AuthenticationFunction authenticationFunction = new AuthenticationFunctionV1(this.mongoAuthProvider, jwtProvider);
     
     MessagesResource messagesResource = new MessagesResource(eventsGateway, saveMessageFunction, listMessagesFunction);
     MessageResource messageResource = new MessageResource(eventsGateway, findMessageFunction, updateMessageFunction, deleteMessageFunction);
-    AuthenticationResource authenticationResource = new AuthenticationResource(authenticationFunction);
+    SecurityTokenGenerator securityTokenGenerator = new JwtTokenGenerator(environmentValues, jwtAuth);
+    Authenticator authenticator = new UserCredentialsAuthenticator(this.mongoAuthProvider);
+    TokenResource tokenResource = new TokenResource(authenticator, environmentValues, securityTokenGenerator);
+    FailureHandler failureHandler = new DefaultFailureHandler();
+
+    Authorizer authorizer = new JwtAuthorizer(jwtAuth);
 
     Integer port = this.environmentValues.getIntValue(WEBAPP_PORT);
 
-    new WebApplication(vertx, messagesResource, messageResource, authenticationResource, port).start(result -> {
+    WebApplication app = new WebApplication(vertx, messagesResource, messageResource, tokenResource, failureHandler, authorizer, port);
+
+    app.start(result -> {
       if (result.succeeded()) {
         future.complete();
       } else {

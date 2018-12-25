@@ -4,7 +4,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import lab.pongoauth.boundary.repository.MessageRepository;
-import lab.pongoauth.entity.Message;
 
 public class DeleteMessageFunctionV1 implements DeleteMessageFunction {
 

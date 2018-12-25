@@ -18,7 +18,10 @@ public class EnvironmentValues {
 
   public static final String ADMIN_PASSWORD = "ADMIN_PASSWORD";
 
-  public static final String ACCESS_TOKEN_SECRET = "ACCESS_TOKEN_SECRET";
+  public static final String JWT_TOKEN_SECRET = "JWT_TOKEN_SECRET";
+  public static final String JWT_TOKEN_AUDIENCE = "JWT_TOKEN_AUDIENCE";
+  public static final String JWT_TOKEN_ISSUER = "JWT_TOKEN_ISSUER";
+  public static final String JWT_TOKEN_LIFETIME_IN_SECONDS = "JWT_TOKEN_LIFETIME_IN_SECONDS";
 
   private static final String DEFAULT_WEBAPP_PORT = "8080";
   private static final String DEFAULT_RABBITMQ_USER = "guest";
@@ -30,8 +33,10 @@ public class EnvironmentValues {
 
   private static final String DEFAULT_ADMIN_PASSWORD = "admin";
 
-  private static final String DEFAULT_ACCESS_TOKEN_SECRET = 
-    "access-token-secret-access-token-secret-access-token-secret-access-token-secret-access-token-secret";
+  private static final String DEFAULT_JWT_TOKEN_SECRET = "WzqRd46wpCjJFGuunuGGfxqveo6zCCR1fw8MczQv";
+  private static final String DEFAULT_JWT_TOKEN_AUDIENCE = "this.service.com";
+  private static final String DEFAULT_JWT_TOKEN_ISSUER = "this.service.com";
+  private static final String DEFAULT_JWT_TOKEN_LIFETIME_IN_SECONDS = "300";
 
   /**
    * Creates a new EnvironmentValues object pre-setted with default values.
@@ -51,8 +56,14 @@ public class EnvironmentValues {
         ? DEFAULT_MONGO_DB_NAME : System.getenv(MONGO_DB_NAME));
     values.put(ADMIN_PASSWORD, System.getenv(ADMIN_PASSWORD) == null 
         ? DEFAULT_ADMIN_PASSWORD : System.getenv(ADMIN_PASSWORD));
-    values.put(ACCESS_TOKEN_SECRET, System.getenv(ACCESS_TOKEN_SECRET) == null 
-        ? DEFAULT_ACCESS_TOKEN_SECRET : System.getenv(ACCESS_TOKEN_SECRET));
+    values.put(JWT_TOKEN_SECRET, System.getenv(JWT_TOKEN_SECRET) == null 
+        ? DEFAULT_JWT_TOKEN_SECRET : System.getenv(JWT_TOKEN_SECRET));
+    values.put(JWT_TOKEN_AUDIENCE, System.getenv(JWT_TOKEN_AUDIENCE) == null 
+        ? DEFAULT_JWT_TOKEN_AUDIENCE : System.getenv(JWT_TOKEN_AUDIENCE));
+    values.put(JWT_TOKEN_ISSUER, System.getenv(JWT_TOKEN_ISSUER) == null 
+        ? DEFAULT_JWT_TOKEN_ISSUER : System.getenv(JWT_TOKEN_ISSUER));
+    values.put(JWT_TOKEN_LIFETIME_IN_SECONDS, System.getenv(JWT_TOKEN_LIFETIME_IN_SECONDS) == null 
+        ? DEFAULT_JWT_TOKEN_LIFETIME_IN_SECONDS : System.getenv(JWT_TOKEN_LIFETIME_IN_SECONDS));
   }
 
   /**
@@ -73,6 +84,19 @@ public class EnvironmentValues {
   public Integer getIntValue(final String key) {
     try {
       return Integer.parseInt(this.getStringValue(key));
+    } catch (Exception e) {
+      return null; // EnvironmentVariable was not set
+    }
+  }
+
+  /**
+   * Returns the value of an environment variable as a Long. 
+   * @param key - Environment variable name
+   * @return value - Environment variable value in Long format
+   */
+  public Long getLongValue(final String key) {
+    try {
+      return Long.parseLong(this.getStringValue(key));
     } catch (Exception e) {
       return null; // EnvironmentVariable was not set
     }

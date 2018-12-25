@@ -1,21 +1,20 @@
 package lab.pongoauth.boundary.config;
 
-import java.util.logging.Logger;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-import lab.pongoauth.boundary.api.AuthenticationResource;
+
+import java.util.logging.Logger;
+
 import lab.pongoauth.boundary.api.MessageResource;
 import lab.pongoauth.boundary.api.MessagesResource;
-import lab.pongoauth.boundary.repository.DocumentConflictException;
-import lab.pongoauth.boundary.repository.DocumentNotFoundException;
+import lab.pongoauth.boundary.api.TokenResource;
+import lab.pongoauth.security.Authorizer;
 
 public class WebApplication {
 
@@ -29,70 +28,75 @@ public class WebApplication {
   private final Router router;
   private final int port;
 
-  public WebApplication(Vertx vertx, 
-                        MessagesResource messagesResource,
-                        MessageResource messageResource,
-                        AuthenticationResource authenticationResource,
-                        int port) {
+  /**
+   * WebApplication default constructor.
+   * 
+   * @param vertx - Vert.x instance where the HttpServer is created.
+   * @param messagesResource - Messages endpoint handler.
+   * @param messageResource - Message endpoing handler.
+   * @param tokenResource - Token endpoint handler.
+   * @param failureHandler - treats the resource failures.
+   * @param authorizer - enforces authorization policies.
+   * @param port - HTTP port to serve.
+   */
+  public WebApplication(
+      Vertx vertx, 
+      MessagesResource messagesResource, 
+      MessageResource messageResource,
+      TokenResource tokenResource,
+      FailureHandler failureHandler,
+      Authorizer authorizer, int port) {
     LOGGER.info("Initializing Web Application...");
 
     this.server = vertx.createHttpServer();
     this.router = Router.router(vertx);
     this.port = port;
 
-    Handler<RoutingContext> defaultFailureHandler = failureRoutingContext -> {
-      HttpServerResponse response = failureRoutingContext.response();
-      Throwable cause = failureRoutingContext.failure();
-
-      if (cause instanceof IllegalArgumentException) {
-        response.setStatusCode(400).end();
-      } else if (cause instanceof DocumentConflictException) {
-        response.setStatusCode(409).end();
-      } else if (cause instanceof DocumentNotFoundException) {
-        response.setStatusCode(404).end();
-      } else {
-        response.setStatusCode(500).end();
-      }
-    };
+    Handler<RoutingContext> defaultFailureHandler = failureHandler.handleFailures();
 
     router.route()
-      .handler(BodyHandler.create())
-      .consumes("application/json")
-      .produces("application/json");
+    .handler(BodyHandler.create())
+    .consumes("application/json")
+    .produces("application/json");
 
-    router.post("/login")
+    router.post("/tokens")
       .consumes("x-www-form-urlencoded")
-      .handler(authenticationResource.authenticateUser())
+      .handler(tokenResource.issueTokenHandler())
       .failureHandler(defaultFailureHandler);
+
+    router.route(MESSAGES_PATH).handler(authorizer.enforceAuthenticated());
+    router.route(MESSAGE_PATH).handler(authorizer.enforceAuthenticated());
 
     router.post(MESSAGES_PATH)
-      .handler(messagesResource.createMessageHandler())
-      .failureHandler(defaultFailureHandler);
+      .handler(authorizer.enforceRoles("admin"))
+      .handler(messagesResource.createMessageHandler());
 
     router.get(MESSAGES_PATH)
-      .handler(messagesResource.listMessageHandler())
-      .failureHandler(defaultFailureHandler);
+      .handler(messagesResource.listMessageHandler());
 
     router.get(MESSAGE_PATH)
-      .handler(messageResource.findMessageHandler())
-      .failureHandler(defaultFailureHandler);
+      .handler(messageResource.findMessageHandler());
 
     router.put(MESSAGE_PATH)
-      .handler(messageResource.updateMessageHandler())
-      .failureHandler(defaultFailureHandler);
+      .handler(authorizer.enforceRoles("admin"))
+      .handler(messageResource.updateMessageHandler());
 
     router.delete(MESSAGE_PATH)
-      .handler(messageResource.deleteMessageHandler())
-      .failureHandler(defaultFailureHandler);
+      .handler(authorizer.enforceRoles("admin"))
+      .handler(messageResource.deleteMessageHandler());
 
-    // Pong resource
-    router.get("/ping").handler(res -> {
-      res.response().end("pong");
+    router.get("/ping").handler(res -> { 
+      res.response().end("pong"); 
     });
 
     server.requestHandler(router);
   }
 
+  /**
+   * Starts the WebApplication.
+   * 
+   * @param resultHandler - startResultHandler
+   */
   public void start(Handler<AsyncResult<Void>> resultHandler) {
     this.server.requestHandler(this.router);
 
